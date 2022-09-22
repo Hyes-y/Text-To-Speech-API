@@ -1,12 +1,11 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
 
 class Project(models.Model):
     """ TTS(Text to Speech) 데이터를 포함하는 프로젝트 모델 """
-    User = get_user_model()
-
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='user_id')
+    USER = settings.AUTH_USER_MODEL
+    user = models.ForeignKey(USER, on_delete=models.DO_NOTHING, db_column='user_id')
     project_id = models.PositiveIntegerField(verbose_name='프로젝트 ID', unique=True)
     title = models.CharField(verbose_name='프로젝트 이름', max_length=50)
     created_at = models.DateTimeField(verbose_name='생성 시각', auto_now_add=True)
