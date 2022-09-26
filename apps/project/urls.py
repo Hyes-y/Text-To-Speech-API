@@ -7,7 +7,7 @@ from .views import ProjectViewSet, TTSDataViewSet
 router = routers.DefaultRouter()
 router.register(r'', ProjectViewSet, basename='project')
 
-detail_router = NestedSimpleRouter(router, r'', lookup='project')
+detail_router = NestedSimpleRouter(router, r'', lookup='')
 detail_router.register(r'data', TTSDataViewSet, basename='project-data')
 
 urlpatterns = [

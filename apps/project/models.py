@@ -11,6 +11,11 @@ class Project(models.Model):
     created_at = models.DateTimeField(verbose_name='생성 시각', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='수정 시각', auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'project_id'], name='unique_project'),
+        ]
+
 
 class TTSData(models.Model):
     """ TTS(Text to Speech) 데이터 모델 """
@@ -28,3 +33,6 @@ class TTSData(models.Model):
     order = models.PositiveIntegerField(verbose_name='정렬 순서', default=1)
     created_at = models.DateTimeField(verbose_name='생성 시각', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='수정 시각', auto_now=True)
+
+    class Meta:
+        ordering = ["order"]

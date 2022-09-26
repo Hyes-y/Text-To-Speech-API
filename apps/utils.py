@@ -1,6 +1,3 @@
-# TODO: 프로젝트별 디렉터리 생성(os.makedir)
-# TODO: 오디오 파일 삭제 기능 구현
-
 import re
 import os
 from datetime import datetime
