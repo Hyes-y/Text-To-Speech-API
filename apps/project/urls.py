@@ -1,7 +1,9 @@
+from .views import ProjectViewSet, TTSDataViewSet
+
+from django.urls import include, path
+
 from rest_framework import routers
 from rest_framework_nested.routers import NestedSimpleRouter
-from django.urls import include, path
-from .views import ProjectViewSet, TTSDataViewSet
 
 
 router = routers.DefaultRouter()

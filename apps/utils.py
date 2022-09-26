@@ -1,7 +1,8 @@
-import re
 import os
-from datetime import datetime
+import re
 import uuid
+from datetime import datetime
+
 from gtts import gTTS
 
 
@@ -43,15 +44,23 @@ def convert_data(args, speed=1.0):
     """
     data, dir_path = args
     converted = []
-    for i, text in enumerate(data):
-        data_id = f"{datetime.now().strftime('%y%m%d%H%M%S')}{str(uuid.uuid4())[:3]}"
-        tts = TTS(
-            text=text,
-            lang='ko',
-        )
-        file_path = os.path.join(dir_path, f'{data_id}.mp3')
-        tts.save(file_path)
-        converted.append((data_id, text))
+    try:
+        for i, text in enumerate(data):
+            data_id = f"{datetime.now().strftime('%y%m%d%H%M%S')}{str(uuid.uuid4())[:3]}"
+            tts = TTS(
+                text=text,
+                lang='ko',
+            )
+            file_path = os.path.join(dir_path, f'{data_id}.mp3')
+            tts.save(file_path)
+            converted.append((data_id, text))
+    except:
+        for data_id, text in converted:
+            file_path = os.path.join(dir_path, f'{data_id}.mp3')
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        return []
+
     return converted
 
 

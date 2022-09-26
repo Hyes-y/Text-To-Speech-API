@@ -23,23 +23,32 @@ class ProjectViewSet(ModelViewSet):
 
 
 class TTSDataViewSet(ModelViewSet):
+    """ 프로젝트에 포함된 TTS Data CRUD ViewSet """
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPageNumberPagination
     lookup_field = 'data_id'
 
     def get_queryset(self):
-        print(self.kwargs.items())
+        """
+        프로젝트에 포함된 TTS 데이터 쿼리셋 반환
+        """
         project = Project.objects.get(user=self.request.user, project_id=self.kwargs['_project_id'])
         queryset = TTSData.objects.filter(project=project)
         return queryset
 
     def get_serializer_class(self):
+        """
+        데이터 생성, 수정 / 조회, 삭제 시리얼라이저 분리
+        """
         if hasattr(self, 'action') and self.action in ["create", "update"]:
             return TTSDataCreateUpdateSerializer
         else:
             return TTSDataSerializer
 
     def perform_destroy(self, instance):
+        """
+        데이터 삭제시 해당 오디오 파일도 함께 삭제
+        """
         if os.path.exists(instance.path):
             os.remove(instance.path)
 
@@ -47,6 +56,12 @@ class TTSDataViewSet(ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def download(self, request, **kwargs):
+        """
+        해당 오디오 파일을 송신하는 action
+
+        GET /projects/:id/data/:id/download/
+        url로 접근시 해당 파일 다운로드
+        """
         instance = self.get_object()
         size = os.path.getsize(instance.path)
         mime_type, _ = mimetypes.guess_type(instance.path)

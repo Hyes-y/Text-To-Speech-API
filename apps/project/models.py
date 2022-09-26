@@ -12,6 +12,7 @@ class Project(models.Model):
     updated_at = models.DateTimeField(verbose_name='수정 시각', auto_now=True)
 
     class Meta:
+        # 현재 프로젝트 id가 숫자로 되어있어 겹칠 가능성이 있으므로 user와 복합키 설정
         constraints = [
             models.UniqueConstraint(fields=['user', 'project_id'], name='unique_project'),
         ]
