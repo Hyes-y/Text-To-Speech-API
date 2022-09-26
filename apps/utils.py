@@ -3,6 +3,8 @@
 
 import re
 import os
+from datetime import datetime
+import uuid
 from gtts import gTTS
 
 
@@ -42,18 +44,17 @@ def convert_data(args, speed=1.0):
     input: list(list, path), float(default=1.0)
     output: list(instance=(id, text))
     """
-    data, path = args
+    data, dir_path = args
     converted = []
     for i, text in enumerate(data):
-        data_id = str(i).zfill(6)
+        data_id = f"{datetime.now().strftime('%y%m%d%H%M%S')}{str(uuid.uuid4())[:3]}"
         tts = TTS(
             text=text,
             lang='ko',
         )
-
-        tts.save(os.path.join(path, f'{data_id}.mp3'))
+        file_path = os.path.join(dir_path, f'{data_id}.mp3')
+        tts.save(file_path)
         converted.append((data_id, text))
-
     return converted
 
 

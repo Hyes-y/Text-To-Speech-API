@@ -11,6 +11,6 @@ detail_router = NestedSimpleRouter(router, r'', lookup='project')
 detail_router.register(r'data', TTSDataViewSet, basename='project-data')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path(r'', include(router.urls)),
     path(r'', include(detail_router.urls)),
 ]
