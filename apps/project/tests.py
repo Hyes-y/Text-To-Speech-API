@@ -20,6 +20,9 @@ class TTSAPITest(APITestCase):
     """
     def setUp(self):
         """ test 를 위한 mock 데이터 추가 """
+        if not os.path.exists(settings.MEDIA_ROOT):
+            os.mkdir(settings.MEDIA_ROOT)
+
         self.project_url = "/api/v1/projects/"
 
         User = get_user_model()
@@ -63,7 +66,7 @@ class TTSAPITest(APITestCase):
     def tearDown(self) -> None:
         if os.path.exists(settings.MEDIA_ROOT):
             shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
-            os.mkdir(settings.MEDIA_ROOT)
+
         super().tearDown()
 
     def test_project_create_success(self):

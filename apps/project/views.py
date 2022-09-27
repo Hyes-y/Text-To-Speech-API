@@ -1,7 +1,9 @@
 import os
+import shutil
 import mimetypes
 
 from django.http.response import HttpResponse
+from django.conf import settings
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -21,6 +23,16 @@ class ProjectViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = Project.objects.filter(user=self.request.user)
         return queryset
+
+    def perform_destroy(self, instance):
+        """
+        프로젝트 삭제시 해당 프로젝트 폴더도 함께 삭제
+        """
+        path = os.path.join(settings.MEDIA_ROOT, instance.project_id)
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
+
+        instance.delete()
 
 
 class TTSDataViewSet(ModelViewSet):

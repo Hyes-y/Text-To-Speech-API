@@ -18,8 +18,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     text: 입력 데이터 (긴 글)
     speed: 속도
     """
-    text = serializers.CharField(max_length=300, write_only=True)
-    speed = serializers.ChoiceField(choices=TTSData.SPEED, write_only=True)
+    text = serializers.CharField(max_length=300, write_only=True, allow_null=True, required=False)
+    speed = serializers.ChoiceField(choices=TTSData.SPEED, write_only=True, allow_null=True, required=False)
 
     class Meta:
         model = Project
@@ -47,31 +47,35 @@ class ProjectSerializer(serializers.ModelSerializer):
                 )
                 break
 
-        # 프로젝트의 오디오 파일을 저장할 디렉터리 생성 및 path 지정
-        path = os.path.join(settings.MEDIA_ROOT, str(project_id))
-        if not os.path.exists(path):
-            os.mkdir(path)
+        if not text:
+            return obj
 
-        # 텍스트 전처리 및 오디오 파일 변환
-        TTS_data = convert_data([preprocess_data(text), path], speed)
+        else:
+            # 프로젝트의 오디오 파일을 저장할 디렉터리 생성 및 path 지정
+            path = os.path.join(settings.MEDIA_ROOT, str(project_id))
+            if not os.path.exists(path):
+                os.mkdir(path)
 
-        if not TTS_data:
-            raise ValueError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
+            # 텍스트 전처리 및 오디오 파일 변환
+            TTS_data = convert_data([preprocess_data(text), path], speed)
 
-        tts_obj = [
-            TTSData(
-                data_id=val[0],
-                text=val[1],
-                speed=speed,
-                order=idx+1,
-                path=os.path.join(path, f'{val[0]}.mp3'),
-                project=obj
-            )
-            for idx, val in enumerate(TTS_data)]
+            if not TTS_data:
+                raise ValueError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
 
-        TTSData.objects.bulk_create(tts_obj)
+            tts_obj = [
+                TTSData(
+                    data_id=val[0],
+                    text=val[1],
+                    speed=speed,
+                    order=idx+1,
+                    path=os.path.join(path, f'{val[0]}.mp3'),
+                    project=obj
+                )
+                for idx, val in enumerate(TTS_data)]
 
-        return obj
+            TTSData.objects.bulk_create(tts_obj)
+
+            return obj
 
 
 class TTSDataCreateUpdateSerializer(serializers.ModelSerializer):
