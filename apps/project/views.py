@@ -1,14 +1,15 @@
 import os
 import mimetypes
-from .models import Project, TTSData
-from .serializers import ProjectSerializer, TTSDataCreateUpdateSerializer, TTSDataSerializer
-from .paginations import CustomPageNumberPagination
 
 from django.http.response import HttpResponse
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+
+from .models import Project, TTSData
+from .serializers import ProjectSerializer, TTSDataCreateUpdateSerializer, TTSDataSerializer
+from .paginations import CustomPageNumberPagination
 
 
 class ProjectViewSet(ModelViewSet):

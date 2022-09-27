@@ -1,14 +1,15 @@
 import os
-
-from .models import Project, TTSData
-from apps.account.models import User
-from apps.utils import preprocess_data, convert_data
+import uuid
 
 from django.db.models import F
 from django.db import transaction
 from django.conf import settings
 
 from rest_framework import serializers
+
+from .models import Project, TTSData
+from apps.account.models import User
+from apps.utils import preprocess_data, convert_data
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -36,11 +37,18 @@ class ProjectSerializer(serializers.ModelSerializer):
         user = User.objects.get(id=request.user.id)
 
         # 프로젝트 id 지정 위해 유저의 프로젝트 개수 계산 (id 지정 방식은 변경 가능)
-        cnt = Project.objects.filter(user=user).count()
-        obj = self.Meta.model.objects.create(user=user, project_id=cnt+1, **validated_data)
+        while True:
+            project_id = f"{str(user.id).zfill(6)}{str(uuid.uuid4())[:4]}"
+            if Project.objects.filter(project_id=project_id).count() == 0:
+                obj = self.Meta.model.objects.create(
+                    user=user,
+                    project_id=project_id,
+                    **validated_data
+                )
+                break
 
         # 프로젝트의 오디오 파일을 저장할 디렉터리 생성 및 path 지정
-        path = os.path.join(settings.MEDIA_ROOT, f"{user.username}{str(obj.project_id)}")
+        path = os.path.join(settings.MEDIA_ROOT, str(project_id))
         if not os.path.exists(path):
             os.mkdir(path)
 
@@ -90,7 +98,7 @@ class TTSDataCreateUpdateSerializer(serializers.ModelSerializer):
         project = Project.objects.get(user=user, project_id=project_id)
         data_length = TTSData.objects.filter(project=project).count()
 
-        if 'order' in data and (data['order'] > data_length + 1 or data['order'] <= 0):
+        if 'order' in data and data['order'] and (data['order'] > data_length + 1 or data['order'] <= 0):
             raise serializers.ValidationError("ERROR: 순서가 잘못되었습니다.")
 
         return data
@@ -103,46 +111,49 @@ class TTSDataCreateUpdateSerializer(serializers.ModelSerializer):
         프로젝트 생성때와 다르게 한 문장씩만 생성이 가능하며
         순서를 지정할 수 있음.
         """
-        text = validated_data.get('text', None)
-        speed = validated_data.get('speed', 1.0)
-        order = validated_data.get('order', None)
+        try:
+            text = validated_data.get('text', None)
+            speed = validated_data.get('speed', 1.0)
+            order = validated_data.get('order', None)
 
-        request = self.context.get("request")
-        user = User.objects.get(id=request.user.id)
-        project_id = self.context.get('view').kwargs['_project_id']
-        project = Project.objects.get(user=user, project_id=project_id)
-        data = TTSData.objects.filter(project=project)
+            request = self.context.get("request")
+            user = User.objects.get(id=request.user.id)
+            project_id = self.context.get('view').kwargs['_project_id']
+            project = Project.objects.get(user=user, project_id=project_id)
+            data = TTSData.objects.filter(project=project)
 
-        path = os.path.join(settings.MEDIA_ROOT, f"{user.username}{str(project_id)}")
-        if not os.path.exists(path):
-            os.mkdir(path)
+            path = os.path.join(settings.MEDIA_ROOT, str(project_id))
+            if not os.path.exists(path):
+                os.mkdir(path)
 
-        new_data = convert_data([preprocess_data(text), path], speed)
+            pre_data = preprocess_data(text)
+            if len(pre_data) != 1:
+                raise serializers.ValidationError("ERROR: 한 문장씩 추가 가능합니다.")
 
-        if len(new_data) != 1:
-            raise ValueError("ERROR: 한 문장씩 추가 가능합니다.")
+            new_data = convert_data([pre_data, path], speed)
+            if not new_data:
+                raise serializers.ValidationError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
 
-        if not new_data:
-            raise ValueError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
+            if not order:
+                # 정렬 순서가 null 인 경우 맨 마지막(len(data) + 1) 에 추가
+                order = len(data) + 1
+            else:
+                # null이 아닌 경우 해당 순서와 같거나 큰 order 값을 지닌 오브젝트의 값 변경
+                for data_obj in data.iterator():
+                    if data_obj.order >= order:
+                        data_obj.order = F('order') + 1
+                        data_obj.save()
 
-        if not order:
-            # 정렬 순서가 null 인 경우 맨 마지막(len(data) + 1) 에 추가
-            order = len(data) + 1
-        else:
-            # null이 아닌 경우 해당 순서와 같거나 큰 order 값을 지닌 오브젝트의 값 변경
-            for data_obj in data.iterator():
-                if data_obj.order >= order:
-                    data_obj.order = F('order') + 1
-                    data_obj.save()
-
-        return TTSData.objects.create(
-                data_id=new_data[0][0],
-                text=new_data[0][1],
-                speed=speed,
-                path=os.path.join(path, f'{new_data[0][0]}.mp3'),
-                order=order,
-                project=project
-        )
+            return TTSData.objects.create(
+                    data_id=new_data[0][0],
+                    text=new_data[0][1],
+                    speed=speed,
+                    path=os.path.join(path, f'{new_data[0][0]}.mp3'),
+                    order=order,
+                    project=project
+            )
+        except:
+            raise
 
     def update(self, instance, validated_data):
         """ TTS 데이터 수정 함수 """
@@ -154,15 +165,15 @@ class TTSDataCreateUpdateSerializer(serializers.ModelSerializer):
             if os.path.exists(instance.path):
                 os.remove(instance.path)
 
-            path = os.path.join(
-                settings.MEDIA_ROOT,
-                f"{instance.project.user.username}{str(instance.project.project_id)}"
-            )
-            TTS_data = convert_data([preprocess_data(text), path], speed)
-            if len(TTS_data) != 1:
-                raise ValueError("ERROR: 한 문장씩 수정 가능합니다.")
+            path = os.path.join(settings.MEDIA_ROOT, str(instance.project.project_id))
+
+            pre_data = preprocess_data(text)
+            if len(pre_data) != 1:
+                raise serializers.ValidationError("ERROR: 한 문장씩 수정 가능합니다.")
+
+            TTS_data = convert_data([pre_data, path], speed)
             if not TTS_data:
-                raise ValueError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
+                raise serializers.ValidationError("ERROR: 오디오 변환 중 오류가 생겼습니다.")
 
             instance.data_id = TTS_data[0][0]
             instance.text = TTS_data[0][1]
