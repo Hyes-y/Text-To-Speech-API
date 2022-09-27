@@ -5,10 +5,11 @@
 1. [프로젝트 개요](#프로젝트-개요)
 2. [개발 기간](#개발-기간)
 3. [프로젝트 기술 스택](#프로젝트-기술-스택)
-4. [과제 요구사항 분석](#과제-요구사항-분석)
+4. [요구사항 분석](#요구사항-분석)
 5. [ERD](#erd)
 6. [API 명세](#api-명세)
-7. [프로젝트 시작 방법](#프로젝트-시작-방법)
+7. [프로젝트 구조](#프로젝트-구조)
+8. [프로젝트 시작 방법](#프로젝트-시작-방법)
 
 
 <br>
@@ -435,6 +436,45 @@ Django Rest Framework 를 이용한 REST API 서버로
 - Response(HTTP Response)
   - status: `200 OK`
   - response.body에 파일 첨부
+
+<br>
+
+## 프로젝트 구조
+```bash
+├── apps
+│   ├── account
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── project
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations
+│   │   ├── models.py
+│   │   ├── paginations.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── urls.py
+│   └── utils.py
+├── audio
+├── config
+│   ├── asgi.py
+│   ├── settings
+│   │   ├── base.py
+│   │   ├── dev.py
+│   │   ├── prod.py
+│   │   └── test.py
+│   ├── urls.py
+│   └── wsgi.py
+├── manage.py
+└── requirements.txt
+```
 
 <br>
 
