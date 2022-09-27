@@ -4,6 +4,8 @@ import mimetypes
 
 from django.http.response import HttpResponse
 from django.conf import settings
+from django.db.models import F
+from django.db import transaction
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -58,12 +60,21 @@ class TTSDataViewSet(ModelViewSet):
         else:
             return TTSDataSerializer
 
+    @transaction.atomic()
     def perform_destroy(self, instance):
         """
         데이터 삭제시 해당 오디오 파일도 함께 삭제
+        정렬 순서 보장을 위해 order 재정의
         """
         if os.path.exists(instance.path):
             os.remove(instance.path)
+
+        queryset = self.get_queryset().filter(order__gt=instance.order)
+        if len(queryset) != 0:
+            for obj in queryset.iterator():
+                if obj.order > instance.order:
+                    obj.order = F('order') - 1
+                    obj.save()
 
         instance.delete()
 
