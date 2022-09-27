@@ -148,22 +148,22 @@ Django Rest Framework 를 이용한 REST API 서버로
 ### 5. 테스트
 - `rest_framework`의 `APITestCase` 이용
 
-- 프로젝트 생성 테스트 <br>
+- 프로젝트
+  - 프로젝트 생성 테스트
     - 성공
-- 프로젝트 조회 테스트 <br>
+  - 프로젝트 조회 테스트
     - 성공
     - 실패: 다른 유저의 프로젝트를 요청한 경우(권한)
-  
-<br>
 
-- 데이터 생성 테스트 <br>
+- TTS 데이터
+  - 데이터 생성 테스트
     - 성공
     - 실패: 입력 문장이 여러 개인 경우
     - 실패: 입력 순서가 유효하지 않은 경우
-- 데이터 수정 테스트 <br>
+  - 데이터 수정 테스트
     - 성공
     - 실패: 입력 문장이 없는 경우
-- 데이터 삭제 테스트 <br>
+  - 데이터 삭제 테스트
     - 성공
 
 <br>
@@ -220,7 +220,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 }
 ```
 - Response
-- status: `201 Created`
+  - status: `201 Created`
 ```json
 {
     "project_id": "프로젝트 id",
@@ -242,7 +242,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 }
 ```
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 {
     "project_id": "프로젝트 id",
@@ -260,7 +260,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `GET /api/v1/projects/`
 
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 [
   {
@@ -280,7 +280,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `GET /api/v1/projects/:project_id/`
 
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 {
     "project_id": "프로젝트 id",
@@ -297,7 +297,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `DELETE /api/v1/projects/:project_id/`
 
 - Response
-- status: `204 NO CONTENT`
+  - status: `204 NO CONTENT`
 
 
 <br>
@@ -314,7 +314,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 }
 ```
 - Response
-- status: `201 Created`
+  - status: `201 Created`
 ```json
 {
     "text": "데이터 테스트입니다",
@@ -335,7 +335,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 }
 ```
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 {
     "text": "데이터 명 수정",
@@ -351,7 +351,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `GET /api/v1/projects/:project_id/data/?pages=`
 
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 {
     "count": 6,
@@ -405,7 +405,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `GET /api/v1/projects/:project_id/data/:data_id/`
 
 - Response
-- status: `200 OK`
+  - status: `200 OK`
 ```json
 {
     "project_id": "000002468b",
@@ -424,7 +424,7 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `DELETE /api/v1/projects/:project_id/data/:data_id/`
 
 - Response
-- status: `204 NO CONTENT`
+  - status: `204 NO CONTENT`
 
 
 <br>
@@ -433,8 +433,8 @@ Django Rest Framework 를 이용한 REST API 서버로
 - URL: `GET /api/v1/projects/:project_id/data/:data_id/download/`
 
 - Response(HTTP Response)
-- status: `200 OK`
-- response.body에 파일 첨부
+  - status: `200 OK`
+  - response.body에 파일 첨부
 
 <br>
 
