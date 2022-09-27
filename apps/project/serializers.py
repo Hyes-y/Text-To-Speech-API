@@ -187,7 +187,9 @@ class TTSDataCreateUpdateSerializer(serializers.ModelSerializer):
 
 class TTSDataSerializer(serializers.ModelSerializer):
     """ TTS 데이터 조회 및 삭제 Serializer """
+    project_id = serializers.CharField(source='project.project_id')
+
     class Meta:
         model = TTSData
-        exclude = ('id', 'path')
-        read_only_fields = ('order', 'data_id', 'text', 'speed', 'created_at', 'updated_at')
+        exclude = ('id', 'path', 'project')
+        read_only_fields = ('order', 'data_id', 'text', 'speed', 'created_at', 'updated_at', 'project_id')
