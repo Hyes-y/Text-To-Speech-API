@@ -61,7 +61,8 @@ CORS_ALLOW_HEADERS = (
 )
 
 LOCAL_APPS = [
-    # Add local apps
+    'apps.account.apps.AccountConfig',
+    'apps.project.apps.ProjectConfig',
 ]
 
 DJANGO_APPS = [
@@ -111,6 +112,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+AUTH_USER_MODEL = 'account.User'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -147,7 +150,7 @@ REST_FRAMEWORK = {
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'Asia/Seoul'
 
@@ -159,3 +162,5 @@ USE_TZ = False
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'audio')
